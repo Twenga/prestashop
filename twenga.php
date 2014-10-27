@@ -92,7 +92,7 @@ class Twenga extends PaymentModule
 	 * need to be in lowercase
 	 * @var array
 	 */
-	public $limited_countries = array('fr', 'de', 'gb', 'uk', 'it', 'es', 'nl');
+	public $limited_countries = array('fr', 'de', 'gb', 'uk', 'it', 'es', 'nl', 'pl');
 
 	private $_allowToWork = true;
 
