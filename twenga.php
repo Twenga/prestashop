@@ -303,8 +303,11 @@ class Twenga extends PaymentModule
 				$bool_save = self::$obj_twenga->saveMerchantLogin();
 				self::$obj_ps_stats->validateSubscription();
 				if (!$bool_save)
-					$this->_errors[] = $this->l('Authentication failed.')."<br />\n"
-						.$this->l('Please review the e-mail sent by Twenga after subscription. If error still occurred, contact Twenga service.');
+					$this->_html = '
+						<div class="conf feed_url">
+						'.$this->l("Please review the e-mail sent by Twenga after subscription. If error still occurred, contact Twenga service.").'
+						</div>
+					';
 				else
 				{
 					self::$obj_twenga->addFeed(array('feed_url' => $this->feed_url));
@@ -343,8 +346,13 @@ class Twenga extends PaymentModule
 				'.$this->l('Your sales tracking is enabled.').'</a>
 				</div>
 			';
-			
-			$this->registerHook('displayHome');
+
+			if (_PS_VERSION_ < '1.6') {
+				$this->registerHook('displayHome');
+			}else{
+				$this->registerHook('hookDisplayHome');
+			}
+
 			$this->registerHook('displayProductButtons');
 			$this->registerHook('displayShoppingCart');
 			$this->registerHook('displayPayment');
@@ -837,6 +845,7 @@ class Twenga extends PaymentModule
 				<p class="marginBottom">'.$this->l('Your catalogue will be listed in approximately 72 hours.').'</p>
 				<p class="marginBottom">'.$this->l('Once your products appear on Twenga, you will receive additional traffic which will by billed using CPC (cost per click).').'<br /> '.$this->l('You can consult').' <a href="'.$tarifs_link.'">'.$this->l('our CPC rates by category.').'</a></p>
 				<p class="marginBottom">'.$this->l('You will benefit from detailed traffic & sales supports tools, allowing you total control on your activity on Twenga.').'</p>
+				<p class="marginBottom">'.$this->l('Any questions or technical issues ? Please').' <a href="https://addons.prestashop.com/en/write-to-developper?id_product=2053" target="_blank">'.$this->l('contact us').'</a>.</p>
 
 						</fieldset>
 					</form>
