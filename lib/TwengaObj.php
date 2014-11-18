@@ -191,7 +191,7 @@ class TwengaObj
 			self::$arr_api_url['getSubscriptionLink'] = 'http://rts.twenga.com/api/Site/GetSubscriptionLink';
 			self::$arr_api_url['siteExist'] = 'http://rts.twenga.com/api/Site/Exist';
 			self::$arr_api_url['siteActivate'] = 'http://rts.twenga.com/api/Site/Activate';
-			self::$arr_api_url['getTrackingScript'] = 'http://rtss.twenga.com/api/Site/GetTrackingScriptV2';
+			self::$arr_api_url['getTrackingScript'] = 'http://rts.twenga.com/api/Site/GetTrackingScriptV2';
 			self::$arr_api_url['orderExist'] = 'http://rts.twenga.com/api/Order/Exist';
 			self::$arr_api_url['orderValidate'] = 'http://rts.twenga.com/api/Order/Validate';
 			self::$arr_api_url['orderCancel'] = 'http://rts.twenga.com/api/Order/Cancel';
