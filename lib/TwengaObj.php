@@ -33,6 +33,8 @@
  */
 class TwengaObj
 {
+	private $_bModeDebug = false;
+
 	/**
 	 * path to load each needed files
 	 * @var string
@@ -189,7 +191,7 @@ class TwengaObj
 			self::$arr_api_url['getSubscriptionLink'] = 'http://rts.twenga.com/api/Site/GetSubscriptionLink';
 			self::$arr_api_url['siteExist'] = 'http://rts.twenga.com/api/Site/Exist';
 			self::$arr_api_url['siteActivate'] = 'http://rts.twenga.com/api/Site/Activate';
-			self::$arr_api_url['getTrackingScript'] = 'http://rts.twenga.com/api/Site/GetTrackingScriptV2';
+			self::$arr_api_url['getTrackingScript'] = 'http://rtss.twenga.com/api/Site/GetTrackingScriptV2';
 			self::$arr_api_url['orderExist'] = 'http://rts.twenga.com/api/Order/Exist';
 			self::$arr_api_url['orderValidate'] = 'http://rts.twenga.com/api/Order/Validate';
 			self::$arr_api_url['orderCancel'] = 'http://rts.twenga.com/api/Order/Cancel';
@@ -550,7 +552,7 @@ class TwengaException extends Exception
 	}
 	public function __construct($message, $code = 0)
 	{
-		if ($code !== 0)
+		if ($code !== 0 && $this->_bModeDebug)
 		{
 			$error_label = self::$translation_object->l('This call to Twenga Web Services failed and returned an HTTP status of %d. That means:', basename(__FILE__, '.php'))."\n";
 			$error_label = sprintf($error_label, $code);
