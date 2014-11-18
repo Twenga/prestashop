@@ -18,10 +18,10 @@
 * versions in the future. If you wish to customize PrestaShop for your
 * needs please refer to http://www.prestashop.com for more information.
 *
-* @author EnvoiMoinsCher <informationapi@boxtale.com>
-* @copyright 2007-2014 PrestaShop SA / 2011-2014 EnvoiMoinsCher
-* @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
-* International Registred Trademark & Property of PrestaShop SA
+*  @author EnvoiMoinsCher <informationapi@boxtale.com>
+*  @copyright 2007-2014 PrestaShop SA / 2011-2014 EnvoiMoinsCher
+*  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+*  International Registred Trademark & Property of PrestaShop SA
 */
 
 /**
@@ -96,7 +96,7 @@ class Twenga extends PaymentModule
 
 	private $_allowToWork = true;
 
-	private $_currentIsoCodeCountry = NULL;
+	private $_currentIsoCodeCountry = null;
 
 	const ONLY_PRODUCTS = 1;
 	const ONLY_DISCOUNTS = 2;
@@ -118,19 +118,18 @@ class Twenga extends PaymentModule
 		global $currentIndex;
 		$this->current_index = $currentIndex;
 		$this->token = Tools::getValue('token');
-	 	$this->name = 'twenga';
-	 	$this->tab = 'smart_shopping';
-	 	$this->version = '2.1';
+		$this->name = 'twenga';
+		$this->tab = 'smart_shopping';
+		$this->version = '2.1';
 		$this->author = 'PrestaShop';
 
-	 	parent::__construct();
+		parent::__construct();
 
 		$this->displayName = $this->l('Twenga Module');
 		$this->description = $this->l('Export your products to Twenga Shopping Search Engine and get new online buyers immediately.');
 
-   		/* Backward compatibility */
-    	if (_PS_VERSION_ < '1.5')
-        	require(_PS_MODULE_DIR_.$this->name.'/backward_compatibility/backward.php');
+		/* Backward compatibility */
+		if (_PS_VERSION_ < '1.5') require(_PS_MODULE_DIR_.$this->name.'/backward_compatibility/backward.php');
 		
 		// For Twenga subscription
 		$protocol = 'http://';
@@ -151,17 +150,20 @@ class Twenga extends PaymentModule
 
 		TwengaObj::setTranslationObject($this);
 		TwengaException::setTranslationObject($this);
-		if (!in_array(strtolower(self::$shop_country), $this->limited_countries))
+		if (!in_array(Tools::strtolower(self::$shop_country), $this->limited_countries))
 		{
 			$this->_allowToWork = false;
-			$this->warning = $this->l('Twenga module works only in specific countries (iso code list:').' '.implode(', ',$this->limited_countries).').';;
+			$this->warning = $this->l('Twenga module works only in specific countries (iso code list:')
+				.' '
+				.implode(', ',$this->limited_countries)
+				.').';
 			return false;
 		}
 
 		// instanciate (just once) the TwengaObj and PrestashopStats
-		if (self::$obj_twenga === NULL)
+		if (self::$obj_twenga === null)
 			self::$obj_twenga = new TwengaObj();
-		if (self::$obj_ps_stats === NULL)
+		if (self::$obj_ps_stats === null)
 			self::$obj_ps_stats = new PrestashopStats($this->site_url);
 		$this->_initCurrentIsoCodeCountry();
 		
@@ -198,7 +200,7 @@ class Twenga extends PaymentModule
 			LEFT JOIN '._DB_PREFIX_.'country_lang as c_l
 			ON c_l.id_country = c.id_country
 			WHERE c_l.id_lang = '.(int)$cookie->id_lang.'
-			AND c.id_country = '.	Configuration::get('PS_COUNTRY_DEFAULT'));
+			AND c.id_country = '.Configuration::get('PS_COUNTRY_DEFAULT'));
 
 		if (isset($country[0]['iso']))
 			$this->_currentIsoCodeCountry = $country[0]['iso'];
@@ -303,11 +305,13 @@ class Twenga extends PaymentModule
 				$bool_save = self::$obj_twenga->saveMerchantLogin();
 				self::$obj_ps_stats->validateSubscription();
 				if (!$bool_save)
+				{
 					$this->_html = '
 						<div class="conf feed_url">
-						'.$this->l("Please review the e-mail sent by Twenga after subscription. If error still occurred, contact Twenga service.").'
+						'.$this->l('Please review the e-mail sent by Twenga after subscription. If error still occurred, contact Twenga service.').'
 						</div>
 					';
+				}
 				else
 				{
 					self::$obj_twenga->addFeed(array('feed_url' => $this->feed_url));
@@ -347,12 +351,7 @@ class Twenga extends PaymentModule
 				</div>
 			';
 
-			if (_PS_VERSION_ < '1.6') {
-				$this->registerHook('displayHome');
-			}else{
-				$this->registerHook('hookDisplayHome');
-			}
-
+			$this->registerHook('displayHome');
 			$this->registerHook('displayProductButtons');
 			$this->registerHook('displayShoppingCart');
 			$this->registerHook('displayPayment');
@@ -430,20 +429,19 @@ class Twenga extends PaymentModule
 		$aAddress = $aAddress[0];
 		
 		$sUserCountry = '';
-		if(isset($aAddress['id_country']) && !empty($aAddress['id_country'])){
-			$sUserCountry = Country::getIsoById($aAddress['id_country']);
-		}
+		if (isset($aAddress['id_country']) && !empty($aAddress['id_country'])) $sUserCountry = Country::getIsoById($aAddress['id_country']);
 
 		// for 1.3 compatibility
 		$tva = false;
-		if(isset($aParams['objOrder']) && !empty($aParams['objOrder'])){
-			$tax = ($aParams['objOrder']->total_paid_tax_incl-$aParams['objOrder']->total_shipping_tax_incl) - ($aParams['objOrder']->total_paid_tax_excl-$aParams['objOrder']->total_shipping_tax_excl);
+		if (isset($aParams['objOrder']) && !empty($aParams['objOrder']))
+		{
+			$tax = ($aParams['objOrder']->total_paid_tax_incl - $aParams['objOrder']->total_shipping_tax_incl) - ($aParams['objOrder']->total_paid_tax_excl - $aParams['objOrder']->total_shipping_tax_excl);
 			$tva = $aParams['objOrder']->carrier_tax_rate;
-		}else{
-			$tax = $aParams['cart']->getOrderTotal(true, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING)-$aParams['cart']->getOrderTotal(false, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING);
-			if($aParams['cart']->getOrderTotal(false, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING)>0){
-				$tva = ($tax * 100) / $aParams['cart']->getOrderTotal(false, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING);
-			}
+		}
+		else
+		{
+			$tax = $aParams['cart']->getOrderTotal(true, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING) - $aParams['cart']->getOrderTotal(false, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING);
+			if ($aParams['cart']->getOrderTotal(false, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING) > 0) $tva = ($tax * 100) / $aParams['cart']->getOrderTotal(false, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING);
 		}
 		
 		$aParamsToTwenga = array();
@@ -463,9 +461,9 @@ class Twenga extends PaymentModule
 		
 		$aParamsToTwenga['basket_id'] = $aParams['cart']->id;
 		$aParamsToTwenga['currency'] = $oCurrency->iso_code;
-		$aParamsToTwenga['total_ht'] = isset($aParams['objOrder']) ? $aParams['objOrder']->total_paid_tax_excl-$aParams['objOrder']->total_shipping_tax_excl : $aParams['cart']->getOrderTotal(false, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING);
+		$aParamsToTwenga['total_ht'] = isset($aParams['objOrder']) ? $aParams['objOrder']->total_paid_tax_excl - $aParams['objOrder']->total_shipping_tax_excl : $aParams['cart']->getOrderTotal(false, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING);
 		$aParamsToTwenga['tva'] = ($tva !== false) ? Tools::ps_round($tva, 2) : '';
-		$aParamsToTwenga['total_ttc'] = isset($aParams['objOrder']) ? $aParams['objOrder']->total_paid_tax_incl-$aParams['objOrder']->total_shipping_tax_incl : $aParams['cart']->getOrderTotal(true, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING);
+		$aParamsToTwenga['total_ttc'] = isset($aParams['objOrder']) ? $aParams['objOrder']->total_paid_tax_incl - $aParams['objOrder']->total_shipping_tax_incl : $aParams['cart']->getOrderTotal(true, Twenga::ONLY_PRODUCTS_WITHOUT_SHIPPING);
 		$aParamsToTwenga['shipping'] = isset($aParams['objOrder']) ? $aParams['objOrder']->total_shipping_tax_incl : $aParams['cart']->getOrderTotal(true, Twenga::ONLY_SHIPPING);
 		$aParamsToTwenga['tax'] = $tax;
 		
@@ -474,12 +472,15 @@ class Twenga extends PaymentModule
 		}
 		
 		$aParamsToTwenga['items'] = array();
-		if($sEvent == 'product' && (isset($_POST['id_product'])) || isset($_GET['id_product'])){
+		if ($sEvent == 'product' && (isset($_POST['id_product'])) || isset($_GET['id_product']))
+		{
 			$iIdProduct = (isset($_POST['id_product'])) ? $_POST['id_product'] : $_GET['id_product'];
 			$oProduct = new Product($iIdProduct);
-			if($oProduct){
+			if ($oProduct)
+			{
 				$oCategory = new Category($oProduct->id_category_default);
-				if($oCategory){
+				if ($oCategory)
+				{
 					$arr_item = array();
 					$arr_item['price'] = $oProduct->price;
 					$arr_item['quantity'] = '';
@@ -490,12 +491,14 @@ class Twenga extends PaymentModule
 					$aParamsToTwenga['items'][] = $arr_item;
 				}
 			}
-		}elseif(isset($aParams['objOrder']) && !empty($aParams['objOrder'])){
+		}
+		elseif (isset($aParams['objOrder']) && !empty($aParams['objOrder']))
+		{
 			foreach ($aParams['objOrder']->getProducts() as $product)
 			{
 				$oCategory = new Category($product['id_category_default']);
 				$arr_item = array();
-				if ($product['unit_price_tax_excl']!= '')
+				if ($product['unit_price_tax_excl'] != '')
 					$arr_item['price'] = (float)$product['unit_price_tax_excl'];
 				if ($product['product_quantity'] != '')
 					$arr_item['quantity'] = (int)$product['product_quantity'];
@@ -509,11 +512,13 @@ class Twenga extends PaymentModule
 					$arr_item['category_name'] = $oCategory->name;
 				$aParamsToTwenga['items'][] = $arr_item;
 			}			
-		}else{
+		}
+		else
+		{
 			foreach ($aParams['cart']->getProducts() as $product)
 			{
 				$arr_item = array();
-				if ($product['price']!= '')
+				if ($product['price'] != '')
 					$arr_item['price'] = (float)$product['price'];
 				if ($product['cart_quantity'] != '')
 					$arr_item['quantity'] = (int)$product['cart_quantity'];
@@ -553,9 +558,9 @@ class Twenga extends PaymentModule
 		global $cookie;
 
 		$id_lang = ((isset($cookie->id_lang)) ? (int)$cookie->id_lang :
-			((isset($_POST['id_lang'])) ? (int)$_POST['id_lang'] : NULL));
+			((isset($_POST['id_lang'])) ? (int)$_POST['id_lang'] : null));
 
-		if ($id_lang === NULL)
+		if ($id_lang === null)
 			return 'Undefined id_lang';
 		$country = Db::getInstance()->ExecuteS('
 			SELECT c.name as name
@@ -575,7 +580,7 @@ class Twenga extends PaymentModule
 	{
 		global $cookie;
 
-		if (!in_array(strtolower($this->_currentIsoCodeCountry), $this->limited_countries))
+		if (!in_array(Tools::strtolower($this->_currentIsoCodeCountry), $this->limited_countries))
 		{
 			$query = '
 				SELECT c_l.name as name
@@ -612,10 +617,9 @@ class Twenga extends PaymentModule
 		{
 			$this->_checkCurrentCountrie();
 			if ((Configuration::get('PS_ORDER_PROCESS_TYPE') == 1 && $this->isRegisteredInHook('displayPayment')) ||
-				(Configuration::get('PS_ORDER_PROCESS_TYPE') == 1 && $this->isRegisteredInHook('Payment')))
-			{
-				$this->submitTwengaActivateTracking();
-			}
+				(Configuration::get('PS_ORDER_PROCESS_TYPE') == 1 && $this->isRegisteredInHook('Payment'))) 
+			$this->submitTwengaActivateTracking();
+			
 		}
 		catch (Exception $e)
 		{
@@ -630,21 +634,18 @@ class Twenga extends PaymentModule
 		}
 		$this->preProcess();
 
-		if ($this->_hasConfigTwenga() && !$this->isRegisteredInHook('displayPayment') && !$this->isRegisteredInHook('Payment')){
+		if ($this->_hasConfigTwenga() && !$this->isRegisteredInHook('displayPayment') && !$this->isRegisteredInHook('Payment'))
 			$this->_html .= $this->displayEnableTracker();
-		}
 
 		$this->_html .= '<h2>'.$this->displayName.'</h2>';
 		$this->_html .= $this->displayTwengaIntro();
-		if (!$this->_hasConfigTwenga()){
-			$this->_html .= $this->displayTwengaHowTo();
-		}
+		if (!$this->_hasConfigTwenga()) $this->_html .= $this->displayTwengaHowTo();
+		
 		$this->_html .= $this->displayTwengaLogin();
 
-		if ($this->_hasConfigTwenga()){
-			if($this->isRegisteredInHook('displayPayment') || $this->isRegisteredInHook('Payment')){
-				$this->_html .= $this->displayDisableTracker();
-			}
+		if ($this->_hasConfigTwenga())
+		{
+			if ($this->isRegisteredInHook('displayPayment') || $this->isRegisteredInHook('Payment')) $this->_html .= $this->displayDisableTracker();
 			$this->_html .= $this->displayFeedUrl();
 		}
 
@@ -656,7 +657,7 @@ class Twenga extends PaymentModule
 	public function displayTwengaHowTo()
 	{
 		global $cookie;
-		$isoUser = strtolower(Language::getIsoById(intval($cookie->id_lang)));
+		$isoUser = Tools::strtolower(Language::getIsoById((int)$cookie->id_lang));
 
 		if ($isoUser == 'gb' || $isoUser == 'en')
 			$link_tools = 'https://rts.twenga.co.uk/account';
@@ -698,9 +699,8 @@ class Twenga extends PaymentModule
 	{
 		global $cookie;
 
-		$isoUser = strtolower(Language::getIsoById(intval($cookie->id_lang)));
-		$defaultIsoCountry = strtolower($this->_currentIsoCodeCountry);
-
+		$isoUser = Tools::strtolower(Language::getIsoById((int)$cookie->id_lang));
+		
 		$errors = array();
 		try
 		{
@@ -797,7 +797,7 @@ class Twenga extends PaymentModule
 	{
 		global $cookie;
 
-		$isoUser = strtolower(Language::getIsoById(intval($cookie->id_lang)));
+		$isoUser = Tools::strtolower(Language::getIsoById((int)$cookie->id_lang));
 		if ($isoUser == 'gb' || $isoUser == 'en')
 			$lost_link = 'https://rts.twenga.co.uk/lostpassword';
 		else
@@ -820,20 +820,17 @@ class Twenga extends PaymentModule
 				<legend>
 					<img src="../modules/'.$this->name.'/img/logo-small.png" width="16" height="16" class="middle" /> ';
 
-		if (((self::$obj_twenga->getHashKey() === NULL || self::$obj_twenga->getHashKey() === '')) &&
-			((self::$obj_twenga->getUserName() === NULL || self::$obj_twenga->getUserName() === '')) &&
-			((self::$obj_twenga->getPassword() === NULL || self::$obj_twenga->getPassword() === '')))
+		if (((self::$obj_twenga->getHashKey() === null || self::$obj_twenga->getHashKey() === '')) &&
+			((self::$obj_twenga->getUserName() === null || self::$obj_twenga->getUserName() === '')) &&
+			((self::$obj_twenga->getPassword() === null || self::$obj_twenga->getPassword() === '')))
 			$output .=  $this->l('B - Installation of Sales Tracking');
 		else
 			$output .=  $this->l('B - Configuration');
 
 		$output .= '</legend>';
 
-		if(self::$obj_twenga->getHashKey() === NULL || self::$obj_twenga->getHashKey() === '')
-		{
-			$output .= '<p class="marginBottom">'.$this->l('Enter here your Twenga Ready to Sell hashkey and Login / Pass').'</p>';
-		}
-
+		if (self::$obj_twenga->getHashKey() === null || self::$obj_twenga->getHashKey() === '') $output .= '<p class="marginBottom">'.$this->l('Enter here your Twenga Ready to Sell hashkey and Login / Pass').'</p>';
+		
 		$output .= '
 			<div class="moduleTwenga-form">
 					<div class="field"><label for="key-twenga"> '.$this->l('Twenga key/HashKey').' <sup>*</sup> :</label> <input id="key-twenga" type="text" size="38" maxlength="32" name="twenga_hashkey" value="'.Tools::safeOutput(self::$obj_twenga->getHashKey()).'"/></div>
@@ -860,7 +857,7 @@ class Twenga extends PaymentModule
 	private function displayTwengaTestimony()
 	{
 		global $cookie;
-		$isoUser = strtolower(Language::getIsoById(intval($cookie->id_lang)));
+		$isoUser = Tools::strtolower(Language::getIsoById((int)$cookie->id_lang));
 
 		if ($isoUser == 'gb' || $isoUser == 'en')
 			$link_banner = 'banner-en';
@@ -881,11 +878,14 @@ class Twenga extends PaymentModule
 	 */
 	private function _hasConfigTwenga()
 	{
-		if (   (self::$obj_twenga->getHashKey() === NULL || self::$obj_twenga->getHashKey() === '')
-			|| (self::$obj_twenga->getUserName() === NULL || self::$obj_twenga->getUserName() === '')
-			|| (self::$obj_twenga->getPassword() === NULL || self::$obj_twenga->getPassword() === '')){
+		if (   (self::$obj_twenga->getHashKey() === null || self::$obj_twenga->getHashKey() === '')
+			|| (self::$obj_twenga->getUserName() === null || self::$obj_twenga->getUserName() === '')
+			|| (self::$obj_twenga->getPassword() === null || self::$obj_twenga->getPassword() === ''))
+		{
 			return false;
-		}else{
+		}
+		else
+		{
 			return true;
 		}
 	}
@@ -896,7 +896,7 @@ class Twenga extends PaymentModule
 	private function displayEnableTracker()
 	{
 		global $cookie;
-		$isoUser = strtolower(Language::getIsoById(intval($cookie->id_lang)));
+		$isoUser = Tools::strtolower(Language::getIsoById((int)$cookie->id_lang));
 		if ($isoUser == 'gb' || $isoUser == 'en')
 			$site_link = 'https://rts.twenga.co.uk/';
 		elseif ($isoUser == 'es')
@@ -918,9 +918,8 @@ class Twenga extends PaymentModule
 			</fieldset>
 		</form>';
 
-		if ( !$this->isRegisteredInHook('displayCarrierList') && !$this->isRegisteredInHook('displayPayment') && !$this->isRegisteredInHook('Payment') ){
-			$str = sprintf($str, $this->l('Activate Tracking'), $this->l('To activate tracking, click on the following button :'), 'submitTwengaActivateTracking', $this->l('Install Twenga sales tracking in just 1 click'));
-		}
+		if ( !$this->isRegisteredInHook('displayCarrierList') && !$this->isRegisteredInHook('displayPayment') && !$this->isRegisteredInHook('Payment') ) $str = sprintf($str, $this->l('Activate Tracking'), $this->l('To activate tracking, click on the following button :'), 'submitTwengaActivateTracking', $this->l('Install Twenga sales tracking in just 1 click'));
+		
 		return $str;
 	}
 
@@ -930,7 +929,7 @@ class Twenga extends PaymentModule
 	private function displayDisableTracker()
 	{
 		global $cookie;
-		$isoUser = strtolower(Language::getIsoById(intval($cookie->id_lang)));
+		$isoUser = Tools::strtolower(Language::getIsoById((int)$cookie->id_lang));
 		if ($isoUser == 'gb' || $isoUser == 'en')
 			$site_link = 'https://rts.twenga.co.uk/';
 		elseif ($isoUser == 'es')
@@ -952,9 +951,8 @@ class Twenga extends PaymentModule
 			</fieldset>
 		</form></div>';
 
-		if ( $this->isRegisteredInHook('displayCarrierList') || $this->isRegisteredInHook('displayPayment') || $this->isRegisteredInHook('Payment') ){
-			$str = sprintf($str, $this->l('Your Twenga sales tracking'), $this->l('Your sales tracking allow you to measure conversion and benefit from optimised traffic.'), 'submitTwengaDisableTracking', $this->l('Uninstall my Twenga Sales Tracking'));
-		}
+		if ( $this->isRegisteredInHook('displayCarrierList') || $this->isRegisteredInHook('displayPayment') || $this->isRegisteredInHook('Payment') ) $str = sprintf($str, $this->l('Your Twenga sales tracking'), $this->l('Your sales tracking allow you to measure conversion and benefit from optimised traffic.'), 'submitTwengaDisableTracking', $this->l('Uninstall my Twenga Sales Tracking'));
+		
 		return $str;
 	}
 
