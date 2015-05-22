@@ -29,8 +29,6 @@ class Tracking extends \Twenga
 			$tax = ($aParams['objOrder']->total_paid_tax_incl-$aParams['objOrder']->total_shipping_tax_incl) - ($aParams['objOrder']->total_paid_tax_excl-$aParams['objOrder']->total_shipping_tax_excl);
 		    $tva = $aParams['objOrder']->carrier_tax_rate;
 	       
-	        $aParamsToTwenga = array();
-	        $aParamsToTwenga['event'] = $sEvent;
 	        $aParamsToTwenga['user_id'] = $aParams['cart']->id_customer;
 	        $aParamsToTwenga['user_global_id'] = md5($oCustomer->email);
 	        $aParamsToTwenga['user_email'] = $oCustomer->email;
@@ -124,6 +122,11 @@ class Tracking extends \Twenga
 
 	private function _buildScript($aParamsToTwenga)
 	{
+		$sHashKey = Configuration::get('TWENGA_INSTALLED');
+		if(empty($sHashKey) || strlen($sHashKey) < 32){
+			return '';
+		}
+
 		if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' && Configuration::get('PS_SSL_ENABLED')!= '0') {
 			$sProtocol = 'https';
 		}else{
@@ -136,7 +139,7 @@ class Tracking extends \Twenga
 		$sTrackingScript .= '<div id="twcm_main" style="display:none;">';
 
 		$sTrackingScript .= '
-		<div class="twcm_key">kljkljkljjlkjkljjkljkl</div>
+		<div class="twcm_key">'.$sHashKey.'</div>
 		<div class="twcm_event">'.$aParamsToTwenga['event'].'</div>
 		<div class="twcm_user_id">'.$aParamsToTwenga['user_id'].'</div>
 		<div class="twcm_user_global_id">'.$aParamsToTwenga['user_global_id'].'</div>

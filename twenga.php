@@ -173,6 +173,7 @@ class Twenga extends Module
     */
     public function doHook($aParams, $sEvent = '')
     {
+        $aParams['event'] = $sEvent;
         include(dirname(__FILE__).'/service/tracking.php');
         $oTracking = new Tracking();     
         return $oTracking->getScript($aParams); 
